@@ -3,6 +3,10 @@
 notice("Deploying nagios service")
 class { 'nagios': }
 
+exec { '/usr/bin/htpasswd -cb /etc/nagios3/htpasswd.users nagiosadmin nagiosadmin': 
+  require => Class['nagios'],
+}
+
 file { '/usr/local/bin/check_docker':
   ensure => file,
   source => 'puppet:///modules/nagios/check_docker',
