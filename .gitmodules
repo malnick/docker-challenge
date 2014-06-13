@@ -1,0 +1,3 @@
+[submodule "nagios-docker"]
+	path = nagios-docker
+	url = https://github.com/jsmartin/nagios-docker.git

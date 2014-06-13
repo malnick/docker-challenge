@@ -11,10 +11,8 @@ config.vm.define :nagios do |deploy|
 	deploy.vm.network :private_network, ip: "10.10.33.2" # Define static IP once dev completes
 	#deploy.vm.network :public_network
 	deploy.vm.provision :puppet, :module_path => "modules", :manifests_path => "manifests", :manifest_file => "deploy_nagios.pp"
-	end
-  
-config.vm.provision "docker" do |d|
-      d.pull_images "ubuntu"
-      d.run "ubuntu"
+	deploy.vm.provision "docker" do |d|
+      		d.pull_images "ubuntu"
       end
+   end
 end
