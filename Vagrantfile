@@ -2,9 +2,10 @@ Vagrant.configure("2") do |config|
 config.vm.provider "virtualbox" do |v|
 	v.customize ["modifyvm", :id, "--memory", 1024]
 end
+
 config.vm.define :nagios do |deploy|
 	deploy.vm.box = "precise64"
-	deploy.vm.hostname = "nginx.server.dev"
+	deploy.vm.hostname = "nagios.server.dev"
 	deploy.vm.box_url = "http://files.vagrantup.com/precise64.box"
 	deploy.vm.synced_folder "modules", "/etc/puppet/modules"
 	deploy.vm.synced_folder "manifests", "/etc/puppet/manifests"
