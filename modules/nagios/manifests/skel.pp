@@ -185,7 +185,7 @@ class nagios::skel {
     content => template('nagios/hostgroups/all.cfg'),
   }
 
-  file { 'nagios_host_localhost.cfg':
+    file { 'nagios_host_localhost.cfg':
     ensure  => $nagios::manage_file,
     path    => "${nagios::customconfigdir}/hosts/localhost.cfg",
     mode    => '0644',

@@ -8,13 +8,6 @@ class { 'nagios':
   require => Exec['/usr/bin/apt-get update'],
 }
 
-file { '/etc/nagios3/auto.d/hosts/localhost.cfg':
-  ensure => file,
-  source => 'puppet:///modules/nagios/localhost.cfg',
-  require => Class['nagios'],
-  notify => Service['nrpe','nagios3'],
-}
-
 exec {'/usr/sbin/usermod -a -G docker nagios':
   require => Class['nagios'],
   notify  => Service['nrpe'],
