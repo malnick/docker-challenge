@@ -20,6 +20,11 @@ file { '/etc/init/docker.conf':
   require => File['/usr/local/bin/check_docker'],
 }
 
+file { '/etc/nagios-plugins/config/docker.cfg':
+  ensure => file,
+  source => 'puppet:///modules/nagios/docker.cfg',
+}
+
 # Docker plugin need some python deps
 $docker_plugin_pkgs = ['docker-py','nagiosplugin']
 
