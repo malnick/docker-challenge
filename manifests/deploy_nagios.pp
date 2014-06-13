@@ -20,13 +20,20 @@ file { '/etc/init/docker.conf':
 $docker_plugin_pkgs = ['docker-py','nagiosplugin']
 
 package { 'python-setuptools':
+  ensure    => present,
+}
+
+package { 'python-pip':
   ensure => present,
 }
 
-exec {"/usr/bin/pip install -r ${docker_plugin_pks}":
-  creates => '',
-  require => Packge ['python-setuptools'],
+exec {"/usr/bin/pip install docker-py":
+  require => Package['python-pip'],
 }
+exec {"/usr/bin/pip install nagiosplugin":
+  require => Package['python-pip'],
+}
+
 
 #package { $docker_plugin_pkgs:
 #  ensure => present,
