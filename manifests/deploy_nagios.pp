@@ -8,6 +8,15 @@ class { 'nagios':
   require => Exec['/usr/bin/apt-get update'],
 }
 
+nagios::plugin { 'docker_status':
+   source => 'nagios/nagios-plugins/docker_socket.py'
+}
+
+exec { '/bin/echo "command[docker_status]=/usr/lib/nagios/plugins/docker_status" >> /etc/nagios/nrpe.cfg':
+  require => File['/etc/nagios/nrpe.cfg'],
+  notify => Service['nrpe'],
+}
+
 exec {'/usr/sbin/usermod -a -G docker nagios':
   require => Class['nagios'],
   notify  => Service['nrpe'],
@@ -22,10 +31,10 @@ exec { '/usr/bin/htpasswd -cb /etc/nagios3/htpasswd.users nagiosadmin nagiosadmi
   require => Class['nagios'],
 }
 
-file { '/usr/lib/nagios/plugins/docker_socket.py':
-  ensure => file,
-  source => 'puppet:///modules/nagios/docker_socket.py',
-}
+#file { '/usr/lib/nagios/plugins/docker_socket.py':
+#  ensure => file,
+#  source => 'puppet:///modules/nagios/docker_socket.py',
+#}
 
 
 # Docker plugin need some python deps
