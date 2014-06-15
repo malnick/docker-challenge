@@ -4,6 +4,7 @@ docker::image { 'training/webapp':
   require => Class['docker'],
 }
 # Super hero hack to run the docker image... see readme for why.
+# Also, in no way is this idempotent, if it's running it'll fail.
 exec { '/usr/bin/docker run -d -p 5000:5000 training/webapp python app.py':
   require => Docker::Image['training/webapp'],
 }
