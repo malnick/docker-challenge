@@ -1,10 +1,19 @@
 # Deploy docker and an Ubuntu image to play with
-notice("Installing docker & an ubuntu image")
 class {'docker':}
-docker::image { 'ubuntu': }
+docker::image { 'training/webapp':
+  require => Class['docker'],
+}
+# Super hero hack to run the docker image... see readme for why.
+exec { '/usr/bin/docker run -d -p 5000:5000 training/webapp python app.py':
+  require => Docker::Image['training/webapp'],
+}
+#docker::run { 'webapp':
+#  image   => 'ubuntu',
+#  command => '/bin/echo test',
+#  require => Docker::Image['training/webapp'],
+#}
 
 # Update this thing
-notice("Deploying nagios service")
 exec { '/usr/bin/apt-get update':}
 
 # Install nagios 
@@ -43,29 +52,5 @@ package { 'ruby1.9.1':
   ensure => present,
   require => Class['nagios'],
 }
-
-
-# Docker plugin need some python deps
-#package { 'python-setuptools':
-#  ensure    => present,
-#}
-
-#package { 'python-pip':
-#  ensure => present,
-#}
-
-#exec {"/usr/bin/pip install docker-py":
-#  require => Package['python-pip'],
-#}
-#exec {"/usr/bin/pip install nagiosplugin":
-#  require => Package['python-pip'],
-#}
-
-
-#package { $docker_plugin_pkgs:
-#  ensure => present,
-#  provider => 'pip',
-#}
-
 
 
