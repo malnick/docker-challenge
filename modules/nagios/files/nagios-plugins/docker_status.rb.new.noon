@@ -1,0 +1,78 @@
+#!/usr/bin/ruby
+# Checks the docker status command for number of running containers
+# Ensures the docker container is running by checking that the socket exists
+# 
+
+# Define some helper methods for Nagios with appropriate exit codes
+def ok(message)
+	puts "OK - #{message}"
+	exit 0
+end
+
+def critical(message)
+	puts "Critical - #{message}"
+	exit 2
+end
+
+def warning(message)
+	puts "Warning - #{message}"
+	exit 1
+end
+
+def unknown(message)
+	puts "Unknown - #{message}"
+	exit 3
+end
+
+# Check to ensure docker is installed
+def docker_installed()
+	if system("which docker > /dev/null")
+		webapp_status()
+	else
+		critical("Docker isn't installed")
+	end
+end
+
+def webapp_status()
+	# Ensure the webapp is running on localhost:5000
+	webapp_run = `docker ps -l | awk {'print $11}' | cut -d- -f1` 
+	should_be   = "0.0.0.0:5000"
+	webapp_run.chomp!.strip!
+	if webapp_run == should_be
+		# Check to ensure there are no 404 errors in the log
+		check_this = "docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404 | awk '{print $7}' | sort | uniq -c"
+		check = system(check_this)
+		if check 
+			IO.popen(check_this) do |io|
+				line  = io.readlines
+				array_error = [] 
+				array_url = []	
+				line.each do |this|
+					number = this.split(' ').first
+					array_error.push(number)
+					url = this.split(' ').last
+				        array_url.push(url)
+				end	
+				puts array_error.zip(array_url).min
+			        puts array_url[array_error.index(array_error.max)]	
+				#if number > "20"  
+			#		case number <=> "20"
+			#			when 0
+				#			warning("#{number} 404 Errors for dir [#{url}], becoming critical")
+				#		when 1
+				#			critical("#{number} 404 Errors for dir [#{url}], critical")
+				#	end
+				#else
+				#	ok("#{number} 404 Errors for dir [#{url}] detected, still below warning levels")  
+				#end
+			end	
+		else
+			ok("Docker & Webapp are in good shape!")
+		end
+	else
+		critical("Webapp is not running on localhost:5000")
+	end
+end
+
+docker_installed()
+	
