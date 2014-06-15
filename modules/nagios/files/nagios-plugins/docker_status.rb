@@ -29,17 +29,17 @@ def docker_installed()
 	if system("which docker")
 		webapp_status()
 	else
-		critical("docker isn't installed")
+		critical("Docker isn't installed")
 	end
 end
 
 def webapp_status()
 	# Ensure the webapp is running on localhost:5000
 	webapp_run = `docker ps -l | awk {'print $11}' | cut -d- -f1` 
-	if webapp_run = "0.0.0.0:5000"
+	if "#{webapp_run}" == "0.0.0.0:5000"
 		# Check to ensure there are no 404 errors in the log
 		# $? = 0 then 404 is found, otherwise returns 1 when not found
-		if system("docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404") = 0
+		if system("docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404") 
 			warning("Docker logs indicate 404 errors")
 		else
 			ok("Docker & Webapp are in good shape!")
