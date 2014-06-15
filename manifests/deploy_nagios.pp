@@ -1,13 +1,15 @@
-# Deploys Nagios service
-
-notice("Deploying nagios service")
+# Deploy docker and an Ubuntu image to play with
+notice("Installing docker & an ubuntu image")
+class {'docker':}
+docker::image { 'ubuntu': }
 
 # Update this thing
+notice("Deploying nagios service")
 exec { '/usr/bin/apt-get update':}
 
 # Install nagios 
 class { 'nagios': 
-  require => Exec['/usr/bin/apt-get update'],
+  require => [Exec['/usr/bin/apt-get update'],Class['docker']]
 }
 
 # Get my plugin on the system correctly
