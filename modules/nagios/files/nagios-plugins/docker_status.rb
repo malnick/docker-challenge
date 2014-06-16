@@ -35,14 +35,31 @@ end
 
 def webapp_status()
 	# Ensure the webapp is running on localhost:5000
-	webapp_run = `docker ps -l | awk {'print $11}' | cut -d- -f1` 
-	should_be   = "0.0.0.0:5000"
+	webapp_run = `netstat -anp | grep 5000 | awk '{print $7}' | cut -d/ -f2`
+	should_be   = "docker"
 	webapp_run.chomp!.strip!
 	if webapp_run == should_be
 		# Check to ensure there are no 404 errors in the log
-		# $? = 0 then 404 is found, otherwise returns 1 when not found
-		if system("docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404 > /dev/null") 
-			warning("Docker logs indicate 404 errors")
+		check_this = "docker logs $(docker ps -l | awk '{print $1}' | awk '{if (NR == 2){print $0}}') 2>&1 | grep 404 | awk '{print $7}' | sort | uniq -c"
+		check = system(check_this)
+		if check 
+			IO.popen(check_this) do |io|
+				line  = io.readlines
+				errors = {} 
+				line.each do |this|
+					number = this.split(' ').first
+					url = this.split(' ').last
+					errors.store(url, number)	
+				end	
+				max_value = errors.values.max
+				max_key = errors.select { |k,v| v==max_value }.keys	
+				case max_value.to_i > 20  
+					when false  
+						warning("#{max_value} 404 Errors at localhost#{max_key}")
+					when true 
+						critical("#{max_value} 404 Errors at localhost#{max_key}")
+				end
+			end	
 		else
 			ok("Docker & Webapp are in good shape!")
 		end

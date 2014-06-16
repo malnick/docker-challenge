@@ -40,32 +40,9 @@ def webapp_status()
 	webapp_run.chomp!.strip!
 	if webapp_run == should_be
 		# Check to ensure there are no 404 errors in the log
-		check_this = "docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404 | awk '{print $7}' | sort | uniq -c"
-		check = system(check_this)
-		if check 
-			IO.popen(check_this) do |io|
-				line  = io.readlines
-				array_error = [] 
-				array_url = []	
-				line.each do |this|
-					number = this.split(' ').first
-					array_error.push(number)
-					url = this.split(' ').last
-				        array_url.push(url)
-				end	
-				puts array_error.zip(array_url).min
-			        puts array_url[array_error.index(array_error.max)]	
-				#if number > "20"  
-			#		case number <=> "20"
-			#			when 0
-				#			warning("#{number} 404 Errors for dir [#{url}], becoming critical")
-				#		when 1
-				#			critical("#{number} 404 Errors for dir [#{url}], critical")
-				#	end
-				#else
-				#	ok("#{number} 404 Errors for dir [#{url}] detected, still below warning levels")  
-				#end
-			end	
+		# $? = 0 then 404 is found, otherwise returns 1 when not found
+		if system("docker logs $(docker ps -l | awk '{print $12}') 2>&1 | grep 404 > /dev/null") 
+			warning("Docker logs indicate 404 errors")
 		else
 			ok("Docker & Webapp are in good shape!")
 		end
